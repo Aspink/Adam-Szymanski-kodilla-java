@@ -13,7 +13,7 @@ public class ExceptionHandling {
             System.out.println("x out of range or y = 1.5. Error: " + e);
         }
         finally {
-            System.out.println();
+            System.out.println("I hope you enjoyed it!");
         }
 
     }
