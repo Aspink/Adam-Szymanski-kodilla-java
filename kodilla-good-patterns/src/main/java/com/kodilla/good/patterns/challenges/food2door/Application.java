@@ -5,25 +5,36 @@ import java.util.List;
 
 public class Application {
     public static void main(String[] args) {
-        List<InternalOrderDTO> ordersToProceed = OrdersGenerator.generate();
-        List<InternalOrderDTO> ordersAccepted = new LinkedList<>();
-        List<InternalOrderDTO> ordersRejected = new LinkedList<>();
+        OrdersCollector ordersCollector = new OrdersCollector();
 
-        while (ordersToProceed.size() > 0) {
-            InternalOrderDTO currentOrder = ordersToProceed.get(0);
-            ordersToProceed.remove(0);
+        switchOrders(ordersCollector);
+
+        System.out.println("All orders processed. " + ordersCollector.ordersAccepted.size() + " orders accepted, " + ordersCollector.ordersRejected.size() + " orders rejected.");
+
+    }
+
+    public static void switchOrders(OrdersCollector ordersCollector) {
+        while (ordersCollector.ordersToProceed.size() > 0) {
+            InternalOrderDTO currentOrder = getFirst(ordersCollector);
             OrderProcessor processor = currentOrder.getProducer().getOrderProcessor(currentOrder);
             OrderDTO processedOrder = processor.process(currentOrder);
-            if(processedOrder.isAccepted()) {
-                ordersAccepted.add(processedOrder.getOrder());
-                System.out.println("Order added to accepted orders list\n");
-            } else {
-                ordersRejected.add(processedOrder.getOrder());
-                System.out.println("Order added to rejected orders list\n");
-            }
+            validateAcceptation (processedOrder, ordersCollector);
         }
+    }
 
-        System.out.println("All orders processed. " + ordersAccepted.size() + " orders accepted, " + ordersRejected.size() + " orders rejected.");
+    public static InternalOrderDTO getFirst(OrdersCollector ordersCollector) {
+        InternalOrderDTO currentOrder = ordersCollector.ordersToProceed.get(0);
+        ordersCollector.ordersToProceed.remove(0);
+        return currentOrder;
+    }
 
+    public static void validateAcceptation (OrderDTO processedOrder, OrdersCollector ordersCollector) {
+        if(processedOrder.isAccepted()) {
+            ordersCollector.ordersAccepted.add(processedOrder.getOrder());
+            System.out.println("Order added to accepted orders list\n");
+        } else {
+            ordersCollector.ordersRejected.add(processedOrder.getOrder());
+            System.out.println("Order added to rejected orders list\n");
+        }
     }
 }
