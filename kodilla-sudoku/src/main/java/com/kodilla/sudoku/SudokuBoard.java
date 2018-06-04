@@ -41,8 +41,6 @@ public class SudokuBoard {
             } else {
                 sudokuBoardImage = sudokuBoardImage + underlineNormal;
             }
-
-
         }
 
         return sudokuBoardImage;
