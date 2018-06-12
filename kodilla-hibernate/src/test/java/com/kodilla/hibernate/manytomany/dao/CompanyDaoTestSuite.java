@@ -9,12 +9,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.transaction.Transactional;
+import java.util.List;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class CompanyDaoTestSuite {
     @Autowired
     CompanyDao companyDao;
+    @Autowired
+    EmployeeDao employeeDao;
 
+    @Transactional
     @Test
     public void testSaveManyToMany(){
         //Given
@@ -50,14 +56,50 @@ public class CompanyDaoTestSuite {
         Assert.assertNotEquals(0, softwareMachineId);
         Assert.assertNotEquals(0, dataMaestersId);
         Assert.assertNotEquals(0, greyMatterId);
+    }
 
-        //CleanUp
-        try {
-            companyDao.delete(softwareMachineId);
-            companyDao.delete(dataMaestersId);
-            companyDao.delete(greyMatterId);
-        } catch (Exception e) {
-            //do nothing
-        }
+    @Transactional
+    @Test
+    public void testNamedQueries(){
+        //Given
+        Employee johnSmith = new Employee("John", "Smith");
+        Employee stephanieClarckson = new Employee("Stephanie", "Clarckson");
+        Employee lindaKovalsky = new Employee("Linda", "Kovalsky");
+        Employee jeremyClarckson = new Employee("Jeremy", "Clarckson");
+
+        Company softwareMachine = new Company("Software Machine");
+        Company dataMaesters = new Company("Data Maesters");
+        Company greyMatter = new Company("Grey Matter");
+        Company softballProducts = new Company("Softball Products");
+
+        softwareMachine.getEmployees().add(johnSmith);
+        dataMaesters.getEmployees().add(stephanieClarckson);
+        dataMaesters.getEmployees().add(lindaKovalsky);
+        greyMatter.getEmployees().add(johnSmith);
+        greyMatter.getEmployees().add(lindaKovalsky);
+        softballProducts.getEmployees().add(lindaKovalsky);
+        softballProducts.getEmployees().add(jeremyClarckson);
+        softballProducts.getEmployees().add(stephanieClarckson);
+
+        johnSmith.getCompanies().add(softwareMachine);
+        johnSmith.getCompanies().add(greyMatter);
+        stephanieClarckson.getCompanies().add(dataMaesters);
+        stephanieClarckson.getCompanies().add(softballProducts);
+        lindaKovalsky.getCompanies().add(dataMaesters);
+        lindaKovalsky.getCompanies().add(greyMatter);
+        lindaKovalsky.getCompanies().add(softballProducts);
+        jeremyClarckson.getCompanies().add(softballProducts);
+
+        //When
+        companyDao.save(softwareMachine);
+        companyDao.save(dataMaesters);
+        companyDao.save(greyMatter);
+        companyDao.save(softballProducts);
+        List<Employee> employeeWithGivenLastname = employeeDao.retrieveEmployeeWithGivenLastname("Clarckson");
+        List<Company> companiesStartingWith = companyDao.retrieveCompaniesStartingWith("Sof");
+
+        //Then
+        Assert.assertEquals(2, employeeWithGivenLastname.size());
+        Assert.assertEquals(2, companiesStartingWith.size());
     }
 }
