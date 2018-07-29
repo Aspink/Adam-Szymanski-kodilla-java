@@ -1,6 +1,7 @@
 package com.kodilla.testing2.crudapp;
 
 import com.kodilla.testing2.config.WebDriverConfig;
+import net.bytebuddy.asm.Advice;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -71,6 +72,7 @@ public class CrudAppTestSuite {
                     buttonCreateCard.click();
                 });
         Thread.sleep(5000);
+        driver.switchTo().alert().accept();
     };
 
     private boolean checkTaskExistsInTrello(String taskName) throws InterruptedException {
@@ -103,10 +105,22 @@ public class CrudAppTestSuite {
         return result;
     }
 
+    private void deleteTestTaskFromCrudApp() throws InterruptedException {
+        driver.findElements(By.xpath("//form[@class=\"datatable__row\"]")).stream()
+                .filter(anyForm ->
+                        anyForm.findElement(By.xpath(".//p[@class=\"datatable__field-value\"]"))
+                                .getText().startsWith("Task number"))
+                .forEach(theForm -> {
+                    theForm.findElement(By.xpath(".//div/fieldset[1]/button[4]")).click();
+                });
+        Thread.sleep(1000);
+    }
+
     @Test
     public void shouldCreateTrelloCard() throws InterruptedException {
         String taskName = createCrudAppTestTask();
         sendTestTaskToTrello(taskName);
         assertTrue(checkTaskExistsInTrello(taskName));
+        deleteTestTaskFromCrudApp();
     }
 }
