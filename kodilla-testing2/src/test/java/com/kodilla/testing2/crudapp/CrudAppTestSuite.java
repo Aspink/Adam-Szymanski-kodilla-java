@@ -71,7 +71,7 @@ public class CrudAppTestSuite {
                             theForm.findElement(By.xpath(".//button[contains(@class, \"card-creation\")]"));
                     buttonCreateCard.click();
                 });
-        Thread.sleep(5000);
+        Thread.sleep(2000);
         driver.switchTo().alert().accept();
     };
 
@@ -105,11 +105,11 @@ public class CrudAppTestSuite {
         return result;
     }
 
-    private void deleteTestTaskFromCrudApp() throws InterruptedException {
+    private void deleteTestTaskFromCrudApp(String taskName) throws InterruptedException {
         driver.findElements(By.xpath("//form[@class=\"datatable__row\"]")).stream()
                 .filter(anyForm ->
                         anyForm.findElement(By.xpath(".//p[@class=\"datatable__field-value\"]"))
-                                .getText().startsWith("Task number"))
+                                .getText().equals(taskName))
                 .forEach(theForm -> {
                     theForm.findElement(By.xpath(".//div/fieldset[1]/button[4]")).click();
                 });
@@ -121,6 +121,6 @@ public class CrudAppTestSuite {
         String taskName = createCrudAppTestTask();
         sendTestTaskToTrello(taskName);
         assertTrue(checkTaskExistsInTrello(taskName));
-        deleteTestTaskFromCrudApp();
+        deleteTestTaskFromCrudApp(taskName);
     }
 }
